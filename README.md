@@ -9,5 +9,6 @@
     - Have the inventory service perform CRUD operations. Connect this service to a Postgres db that is running as a docker container.
     - The pricing service will contain the prices for every item within the Postgres table of the inventory service. The pricing service will hold this information in a non-relation database (MongoDB). 
     - These services will communicate on the backend via a messabe broker (RabbitMQ).
+    - I have not decided what I will make for the "other" service in this image. 
     
     
