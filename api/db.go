@@ -1,14 +1,19 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 	"log"
+	"time"
 
 	_ "github.com/lib/pq"
 )
 
+const dbtimeout = time.Second * 5
+
 // make storage interface
 type InventoryStorage interface {
+	AddItem(item *InventoryItem) error
 }
 
 // make Postgres struct
@@ -51,4 +56,23 @@ func (s *PostgresDB) createInventoryTable() error {
 
 	_, err := s.db.Exec(stmt)
 	return err
+}
+
+// function to add items to database
+func (s *PostgresDB) AddItem(item *InventoryItem) error {
+	ctx, cancel := context.WithTimeout(context.Background(), dbtimeout)
+	defer cancel()
+
+	query := `INSERT INTO inventory (name, amount) VALUES ($1, $2)`
+
+	_, err := s.db.QueryContext(ctx, query,
+		item.Name,
+		item.Amount,
+	)
+	if err != nil {
+		return err
+	}
+
+	return nil
+
 }

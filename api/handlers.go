@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 )
@@ -31,7 +32,24 @@ func (s *APIServer) handleGetInventory(w http.ResponseWriter, r *http.Request) e
 }
 
 func (s *APIServer) handleAddInventory(w http.ResponseWriter, r *http.Request) error {
-	return nil
+	// create item variable
+	var item InventoryItem
+
+	// decode request body into item variable
+	err := json.NewDecoder(r.Body).Decode(&item)
+	if err != nil {
+		return err
+	}
+
+	// call APIServer db function to add item to PostgresDB
+	newItem := s.db.AddItem(&item)
+	if err != nil {
+		return err
+	}
+
+	// return success
+	return writeJSON(w, http.StatusOK, newItem)
+
 }
 
 func (s *APIServer) handleUpdateInventory(w http.ResponseWriter, r *http.Request) error {
@@ -40,4 +58,11 @@ func (s *APIServer) handleUpdateInventory(w http.ResponseWriter, r *http.Request
 
 func (s *APIServer) handleDeleteInventory(w http.ResponseWriter, r *http.Request) error {
 	return nil
+}
+
+// helper function to write json
+func writeJSON(w http.ResponseWriter, status int, v any) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
+	return json.NewEncoder(w).Encode(v)
 }
