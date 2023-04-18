@@ -32,7 +32,7 @@ func (s *APIServer) Run() {
 
 	mux := http.NewServeMux()
 
-	mux.Handle("/api/warehouse/inventory", makeHTTPHandler(s.handleHome))
+	mux.Handle("/api/warehouse/inventory", makeHTTPHandler(s.handleInventory))
 
 	log.Println("Starting server on port ", s.listenAddr)
 

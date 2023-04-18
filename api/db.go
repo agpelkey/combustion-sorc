@@ -14,6 +14,8 @@ const dbtimeout = time.Second * 5
 // make storage interface
 type InventoryStorage interface {
 	AddItem(item *InventoryItem) error
+	GetAllItems() ([]*InventoryItem, error)
+	UpdateItem(id int) error
 }
 
 // make Postgres struct
@@ -75,4 +77,59 @@ func (s *PostgresDB) AddItem(item *InventoryItem) error {
 
 	return nil
 
+}
+
+func (s *PostgresDB) GetAllItems() ([]*InventoryItem, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), dbtimeout)
+	defer cancel()
+
+	// query to find all items
+	query := `SELECT * FROM inventory`
+
+	// execute query to find all rows
+	rows, err := s.db.QueryContext(ctx, query)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// close connection to rows
+	defer rows.Close()
+
+	// create variable that is a slice of our inventory items
+	var items []*InventoryItem
+
+	// iterate through the rows and scan the results in the local variable item
+	for rows.Next() {
+		var item InventoryItem
+		err := rows.Scan(
+			&item.Id,
+			&item.Name,
+			&item.Amount,
+		)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		items = append(items, &item)
+
+	}
+
+	// return list of all items from DB.
+	return items, nil
+
+}
+
+// function to update/change an item in the inventory
+func (s *PostgresDB) UpdateItem(id int) error {
+	ctx, cancel := context.WithTimeout(context.Background(), dbtimeout)
+	defer cancel()
+
+	query := `UPDATE inventory SET name = $1, amount = $2 where id = $3`
+
+	_, err := s.db.ExecContext(ctx, query)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return nil
 }

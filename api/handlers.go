@@ -3,7 +3,9 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
+	"strconv"
 )
 
 func (s *APIServer) handleHome(w http.ResponseWriter, r *http.Request) error {
@@ -15,20 +17,24 @@ func (s *APIServer) handleInventory(w http.ResponseWriter, r *http.Request) erro
 	switch {
 	case r.Method == "GET":
 		s.handleGetInventory(w, r)
-		return nil
 	case r.Method == "POST":
 		s.handleAddInventory(w, r)
-	case r.Method == "PUT":
+	case r.Method == "PATCH":
 		s.handleUpdateInventory(w, r)
 	case r.Method == "DELETE":
 		s.handleDeleteInventory(w, r)
 	}
 
-	return fmt.Errorf("Error, method %s not allowed", r.Method)
+	return nil
 }
 
 func (s *APIServer) handleGetInventory(w http.ResponseWriter, r *http.Request) error {
-	return nil
+	obj, err := s.db.GetAllItems()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return writeJSON(w, http.StatusOK, obj)
 }
 
 func (s *APIServer) handleAddInventory(w http.ResponseWriter, r *http.Request) error {
@@ -53,6 +59,17 @@ func (s *APIServer) handleAddInventory(w http.ResponseWriter, r *http.Request) e
 }
 
 func (s *APIServer) handleUpdateInventory(w http.ResponseWriter, r *http.Request) error {
+
+	id, err := strconv.Atoi(r.URL.Query().Get("id"))
+	if err != nil || id < 1 {
+		http.NotFound(w, r)
+		return err
+	}
+
+	if err := s.db.UpdateItem(id); err != nil {
+		log.Fatal(err)
+	}
+
 	return nil
 }
 
