@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+
+	"github.com/go-chi/chi/v5"
 )
 
 type APIServer struct {
@@ -30,11 +32,13 @@ func makeHTTPHandler(f apiFunc) http.HandlerFunc {
 
 func (s *APIServer) Run() {
 
-	mux := http.NewServeMux()
+	router := chi.NewRouter()
 
-	mux.Handle("/api/warehouse/inventory", makeHTTPHandler(s.handleInventory))
+	router.HandleFunc("/api/warehouse/inventory", makeHTTPHandler(s.handleInventory))
+	router.HandleFunc("/api/warehouse/inventory/delete/{id}", makeHTTPHandler(s.handleDeleteInventory))
+	router.HandleFunc("/api/warehouse/inventory/update/{id}", makeHTTPHandler(s.handleUpdateInventory))
 
 	log.Println("Starting server on port ", s.listenAddr)
 
-	http.ListenAndServe(s.listenAddr, mux)
+	http.ListenAndServe(s.listenAddr, router)
 }

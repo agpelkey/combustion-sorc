@@ -16,6 +16,7 @@ type InventoryStorage interface {
 	AddItem(item *InventoryItem) error
 	GetAllItems() ([]*InventoryItem, error)
 	UpdateItem(id int) error
+	DeleteItem(id int) error
 }
 
 // make Postgres struct
@@ -119,14 +120,28 @@ func (s *PostgresDB) GetAllItems() ([]*InventoryItem, error) {
 
 }
 
+func (s *PostgresDB) DeleteItem(id int) error {
+	ctx, cancel := context.WithTimeout(context.Background(), dbtimeout)
+	defer cancel()
+
+	query := `DELETE FROM inventory WHERE id = $1`
+
+	_, err := s.db.ExecContext(ctx, query, id)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return nil
+}
+
 // function to update/change an item in the inventory
 func (s *PostgresDB) UpdateItem(id int) error {
 	ctx, cancel := context.WithTimeout(context.Background(), dbtimeout)
 	defer cancel()
 
-	query := `UPDATE inventory SET name = $1, amount = $2 where id = $3`
+	query := `UPDATE inventory SET name = $2, amount = $3 where id = $1`
 
-	_, err := s.db.ExecContext(ctx, query)
+	_, err := s.db.ExecContext(ctx, query, id)
 	if err != nil {
 		log.Fatal(err)
 	}

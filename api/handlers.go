@@ -6,6 +6,9 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+
+	"github.com/go-chi/chi/v5"
+	_ "github.com/go-chi/chi/v5"
 )
 
 func (s *APIServer) handleHome(w http.ResponseWriter, r *http.Request) error {
@@ -19,10 +22,6 @@ func (s *APIServer) handleInventory(w http.ResponseWriter, r *http.Request) erro
 		s.handleGetInventory(w, r)
 	case r.Method == "POST":
 		s.handleAddInventory(w, r)
-	case r.Method == "PATCH":
-		s.handleUpdateInventory(w, r)
-	case r.Method == "DELETE":
-		s.handleDeleteInventory(w, r)
 	}
 
 	return nil
@@ -60,13 +59,18 @@ func (s *APIServer) handleAddInventory(w http.ResponseWriter, r *http.Request) e
 
 func (s *APIServer) handleUpdateInventory(w http.ResponseWriter, r *http.Request) error {
 
-	id, err := strconv.Atoi(r.URL.Query().Get("id"))
-	if err != nil || id < 1 {
-		http.NotFound(w, r)
-		return err
+	if r.Method != "PUT" {
+		fmt.Errorf("Method %s not allowed")
 	}
 
-	if err := s.db.UpdateItem(id); err != nil {
+	id := chi.URLParam(r, "id")
+
+	requestID, err := strconv.Atoi(id)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if err := s.db.UpdateItem(requestID); err != nil {
 		log.Fatal(err)
 	}
 
@@ -74,6 +78,20 @@ func (s *APIServer) handleUpdateInventory(w http.ResponseWriter, r *http.Request
 }
 
 func (s *APIServer) handleDeleteInventory(w http.ResponseWriter, r *http.Request) error {
+
+	if r.Method == "DELETE" {
+		id := chi.URLParam(r, "id")
+
+		strID, err := strconv.Atoi(id)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		if err := s.db.DeleteItem(strID); err != nil {
+			log.Fatal(err)
+		}
+	}
+
 	return nil
 }
 
