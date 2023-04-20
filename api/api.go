@@ -36,7 +36,7 @@ func (s *APIServer) Run() {
 
 	router.HandleFunc("/api/warehouse/inventory", makeHTTPHandler(s.handleInventory))
 	router.HandleFunc("/api/warehouse/inventory/delete/{id}", makeHTTPHandler(s.handleDeleteInventory))
-	router.HandleFunc("/api/warehouse/inventory/update/{id}", makeHTTPHandler(s.handleUpdateInventory))
+	router.HandleFunc("/api/warehouse/inventory/update", makeHTTPHandler(s.handleUpdateInventory))
 
 	log.Println("Starting server on port ", s.listenAddr)
 

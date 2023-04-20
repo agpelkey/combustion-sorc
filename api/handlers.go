@@ -60,21 +60,35 @@ func (s *APIServer) handleAddInventory(w http.ResponseWriter, r *http.Request) e
 func (s *APIServer) handleUpdateInventory(w http.ResponseWriter, r *http.Request) error {
 
 	if r.Method != "PUT" {
-		fmt.Errorf("Method %s not allowed")
+		fmt.Errorf("Method %s not allowed", r.Method)
 	}
 
-	id := chi.URLParam(r, "id")
+	// create variable of type InventoryItem
+	var payload InventoryItem
 
-	requestID, err := strconv.Atoi(id)
+	// Decode client request body into payload objet
+	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+		log.Fatal(err)
+	}
+
+	// retrieve the item from the DB to changed
+	item, err := s.db.GetItem(payload.Id)
+	if err != nil {
+		return err
+	}
+
+	// make the changes to the item in the db
+	item.Id = payload.Id
+	item.Name = payload.Name
+	item.Amount = payload.Amount
+
+	err = s.db.UpdateItem(*item)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	if err := s.db.UpdateItem(requestID); err != nil {
-		log.Fatal(err)
-	}
-
 	return nil
+
 }
 
 func (s *APIServer) handleDeleteInventory(w http.ResponseWriter, r *http.Request) error {
