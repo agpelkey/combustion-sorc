@@ -30,13 +30,6 @@ func Init() (*MongoInstance, error) {
 		log.Panic(err)
 	}
 
-	// disconnect if there was an error
-	defer func() {
-		if err := client.Disconnect(ctx); err != nil {
-			panic(err)
-		}
-	}()
-
 	// Database collection
 	db := client.Database("ItemPrices").Collection("prices")
 

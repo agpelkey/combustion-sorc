@@ -36,7 +36,8 @@ func (s *APIServer) Run() {
 
 	mux := http.NewServeMux()
 
-	mux.Handle("/api/warehouse/pricing", makeHTTPHandler(s.handlePricing))
+	mux.Handle("/api/warehouse/pricing", makeHTTPHandler(s.handleAddItem))
+	mux.Handle("/api/warehouse/pricing{id}", makeHTTPHandler(s.handleGetPrice))
 
 	log.Println("Starting API server on port", s.listenAddr)
 
