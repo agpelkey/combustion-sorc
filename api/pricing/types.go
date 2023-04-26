@@ -1,6 +1,8 @@
 package main
 
-import "go.mongodb.org/mongo-driver/bson/primitive"
+import (
+	"go.mongodb.org/mongo-driver/bson/primitive"
+)
 
 type Item struct {
 	ID    primitive.ObjectID `json:"id" bson:"_id,omitempty"`

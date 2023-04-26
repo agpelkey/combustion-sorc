@@ -1,32 +1,39 @@
 package main
 
 import (
-	"context"
-	"encoding/json"
-	"log"
 	"net/http"
-
-	"github.com/gorilla/mux"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func (s *APIServer) handleGetPrice(w http.ResponseWriter, r *http.Request) error {
+	return nil
+}
+
+func (s *APIServer) handleAddItem(w http.ResponseWriter, r *http.Request) error {
+	return nil
+}
+
+/*
+func (s *APIServer) handleGetPrice(w http.ResponseWriter, r *http.Request) error {
 
 	params := mux.Vars(r)
-	id, _ := primitive.ObjectIDFromHex(params["id"])
+
+	id, err := primitive.ObjectIDFromHex(params["id"])
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	var item Item
 
 	coll := s.db.Client().Database("ItemPrices").Collection("price")
 
-	err := coll.FindOne(context.TODO(), Item{ID: id}).Decode(&item)
+	err = coll.FindOne(context.TODO(), Item{ID: id}).Decode(&item)
 	if err != nil {
-		return err
+		log.Println(err)
 	}
 
 	json.NewEncoder(w).Encode(item)
 
-	return nil
+	return
 }
 
 func (s *APIServer) handleAddItem(w http.ResponseWriter, r *http.Request) error {
@@ -54,6 +61,7 @@ func (s *APIServer) handleAddItem(w http.ResponseWriter, r *http.Request) error 
 
 	return nil
 }
+*/
 
 // for future implementation. Will need to figure out how to gate this behind admin access so not anyone can just alter the price.
 // func (s *APIServer) handleUpdateItemPrice(w http.ResponseWriter, r *http.Request) error {

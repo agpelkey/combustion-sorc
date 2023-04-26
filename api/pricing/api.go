@@ -5,18 +5,18 @@ import (
 	"log"
 	"net/http"
 
-	"go.mongodb.org/mongo-driver/mongo"
+	"github.com/gorilla/mux"
 )
 
 type APIServer struct {
 	listenAddr string
-	db         *mongo.Database
+	db         PriceStorage
 }
 
-func NewAPIServer(listenAddr string, mg *MongoInstance) *APIServer {
+func NewAPIServer(listenAddr string, pd PriceStorage) *APIServer {
 	return &APIServer{
 		listenAddr: listenAddr,
-		db:         mg.DB,
+		db:         pd,
 	}
 }
 
@@ -34,12 +34,12 @@ func makeHTTPHandler(f apifunc) http.HandlerFunc {
 
 func (s *APIServer) Run() {
 
-	mux := http.NewServeMux()
+	r := mux.NewRouter()
 
-	mux.Handle("/api/warehouse/pricing", makeHTTPHandler(s.handleAddItem))
-	mux.Handle("/api/warehouse/pricing{id}", makeHTTPHandler(s.handleGetPrice))
+	r.Handle("/api/warehouse/pricing", makeHTTPHandler(s.handleAddItem))
+	r.Handle("/api/warehouse/pricing/{id}", makeHTTPHandler(s.handleGetPrice))
 
 	log.Println("Starting API server on port", s.listenAddr)
 
-	http.ListenAndServe(s.listenAddr, mux)
+	http.ListenAndServe(s.listenAddr, r)
 }
