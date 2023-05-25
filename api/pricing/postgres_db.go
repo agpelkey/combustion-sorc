@@ -1,20 +1,25 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 	"log"
+	"time"
 
 	_ "github.com/lib/pq"
 )
 
 // Create interface for DB connections
 type PriceStorage interface {
+    GetItemByID(id int) ([]*Item, error)
 }
 
 // Create Postgres DB struct
 type PostgresDB struct {
 	DB *sql.DB
 }
+
+const dbtimeout = 10 * time.Second
 
 // Make postgres connection to DB
 func NewPostgresDB() (*PostgresDB, error) {
@@ -53,3 +58,46 @@ func (p *PostgresDB) createPricingTable() error {
 	}
 	return nil
 }
+
+func (p *PostgresDB) GetItemByID(id int) ([]*Item, error) {
+    ctx, cancel := context.WithTimeout(context.Background(), dbtimeout) 
+    defer cancel()
+
+    query := `SELECT id, price WHERE id = $1`
+
+    rows, err := p.DB.QueryContext(ctx, query, id)
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    var items []*Item
+
+    for rows.Next() {
+        var item Item
+        err = rows.Scan(
+            &item.ID,
+            &item.Price,
+        )
+        if err != nil {
+            return nil, err 
+        }
+
+        items = append(items, &item)
+    }
+
+    return items, nil
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
