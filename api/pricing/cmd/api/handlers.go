@@ -1,30 +1,17 @@
 package main
 
 import (
-	"log"
 	"net/http"
-	"strconv"
-
-	"github.com/gorilla/mux"
 )
 
-func (s *APIServer) handleGetPrice(w http.ResponseWriter, r *http.Request) error {
-    id := mux.Vars(r)["id"]
-    convertedID, err := strconv.Atoi(id) 
-    
-    payload, err := s.db.GetItemByID(convertedID)
-    if err != nil {
-        log.Fatal(err)
-    }
-
-    return writeJSON(w, http.StatusOK, payload) 
+func (app *application) handleGetPrice(w http.ResponseWriter, r *http.Request) {
 }
 
+/*
 func (s *APIServer) handleAddItem(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
-/*
 func (s *APIServer) handleGetPrice(w http.ResponseWriter, r *http.Request) error {
 
 	params := mux.Vars(r)

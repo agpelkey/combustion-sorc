@@ -1,13 +1,6 @@
 package main
 
-import (
-	"fmt"
-	"log"
-	"net/http"
-
-	"github.com/gorilla/mux"
-)
-
+/*
 type APIServer struct {
 	listenAddr string
 	db         PriceStorage
@@ -43,3 +36,4 @@ func (s *APIServer) Run() {
 
 	http.ListenAndServe(s.listenAddr, r)
 }
+*/
