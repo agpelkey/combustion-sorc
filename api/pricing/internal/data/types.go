@@ -1,10 +1,15 @@
-package main
+package data
 
 import (
-	"go.mongodb.org/mongo-driver/bson/primitive"
+	"database/sql"
 )
 
-type Item struct {
-	ID    primitive.ObjectID `json:"id" bson:"_id,omitempty"`
-	Price int                `json:"price" bson:"price,omitempty"`
+type Models struct {
+	Items ItemModel
+}
+
+func NewItems(db *sql.DB) Models {
+	return Models{
+		Items: ItemModel{DB: db},
+	}
 }

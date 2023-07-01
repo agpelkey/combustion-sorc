@@ -1,13 +1,11 @@
-package main
+package data
 
-import (
-	"context"
-	"database/sql"
-	"log"
-	"time"
+import "database/sql"
 
-	_ "github.com/lib/pq"
-)
+type Item struct {
+	ID    int `json:"id"`
+	Price int `json:"price"`
+}
 
 // Create interface for DB connections
 type PriceStorage interface {
@@ -15,10 +13,11 @@ type PriceStorage interface {
 }
 
 // Create Postgres DB struct
-type PostgresDB struct {
+type ItemModel struct {
 	DB *sql.DB
 }
 
+/*
 const dbtimeout = 10 * time.Second
 
 // Make postgres connection to DB
@@ -87,3 +86,4 @@ func (p *PostgresDB) GetItemByID(id int) ([]*Item, error) {
 
 	return items, nil
 }
+*/
