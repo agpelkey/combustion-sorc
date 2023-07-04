@@ -1,89 +1,58 @@
 package data
 
-import "database/sql"
+import (
+	"context"
+	"database/sql"
+	"errors"
+	"time"
+
+	"github.com/jackc/pgx/v5/pgxpool"
+)
 
 type Item struct {
 	ID    int `json:"id"`
+	Name  int `json:"name"`
 	Price int `json:"price"`
 }
 
 // Create interface for DB connections
 type PriceStorage interface {
-	GetItemByID(id int) ([]*Item, error)
+	GetItemByID(id int) (*Item, error)
 }
 
 // Create Postgres DB struct
 type ItemModel struct {
-	DB *sql.DB
+	DB *pgxpool.Pool
 }
 
-/*
-const dbtimeout = 10 * time.Second
-
-// Make postgres connection to DB
-func NewPostgresDB() (*PostgresDB, error) {
-
-	connStr := "user=postgres dbname=postgres password=pricing sslmode=disable"
-
-	db, err := sql.Open("postgres", connStr)
-	if err != nil {
-		log.Fatal(err)
+func (i ItemModel) GetItemByID(id int64) (*Item, error) {
+	if id < 1 {
+		return nil, ErrRecordNotFound
 	}
 
-	if err := db.Ping(); err != nil {
-		log.Fatal(err)
-	}
+	query := `SELECT id, name, price
+						FROM item_prices
+						WHERE id = $1`
 
-	return &PostgresDB{
-		DB: db,
-	}, nil
-}
+	var item Item
 
-// Function to Init DB
-func (p *PostgresDB) Init() error {
-	return p.createPricingTable()
-}
-
-// Create DB table
-func (p *PostgresDB) createPricingTable() error {
-	stmt := `CREATE TABLE IF NOT EXISTS pricing (
-			id SERIAL PRIMARY KEY,
-			price INTEGER
-		);`
-
-	_, err := p.DB.Exec(stmt)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return nil
-}
-
-func (p *PostgresDB) GetItemByID(id int) ([]*Item, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), dbtimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	query := `SELECT id, price WHERE id = $1`
+	err := i.DB.QueryRow(ctx, query, id).Scan(
+		&item.ID,
+		&item.Name,
+		&item.Price,
+	)
 
-	rows, err := p.DB.QueryContext(ctx, query, id)
 	if err != nil {
-		log.Fatal(err)
-	}
-
-	var items []*Item
-
-	for rows.Next() {
-		var item Item
-		err = rows.Scan(
-			&item.ID,
-			&item.Price,
-		)
-		if err != nil {
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			return nil, ErrRecordNotFound
+		default:
 			return nil, err
 		}
-
-		items = append(items, &item)
 	}
 
-	return items, nil
+	return &item, nil
 }
-*/

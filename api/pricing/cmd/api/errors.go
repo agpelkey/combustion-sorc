@@ -29,3 +29,9 @@ func (app *application) serverErrorResponse(w http.ResponseWriter, r *http.Reque
 	message := "the server encountered a problem and could not process your request"
 	app.errorResponse(w, r, http.StatusInternalServerError, message)
 }
+
+// function to return a 404 Not Found Response status code and JSON response to the clietn
+func (app *application) notFoundResponse(w http.ResponseWriter, r *http.Request) {
+	message := "the requested resource could not be found"
+	app.errorResponse(w, r, http.StatusNotFound, message)
+}

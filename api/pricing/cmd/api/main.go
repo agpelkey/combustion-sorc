@@ -1,12 +1,13 @@
 package main
 
 import (
-	"database/sql"
+	"context"
 	"flag"
 	"os"
 
 	"github.com/agpelkey/combustion-sorc/internal/data"
 	"github.com/agpelkey/combustion-sorc/internal/jsonlog"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type config struct {
@@ -40,43 +41,21 @@ func main() {
 
 	logger := jsonlog.New(os.Stdout, jsonlog.LevelInfo)
 
-	/*
-		dbConn, err := NewPostgresDB()
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		if err := dbConn.createPricingTable(); err != nil {
-			log.Fatal(err)
-		}
-	*/
-	db, err := openDB(cfg)
+	dbpool, err := pgxpool.New(context.Background(), os.Getenv("PRICING_DB_DSN"))
 	if err != nil {
 		logger.PrintFatal(err, nil)
 	}
+	defer dbpool.Close()
 
-	logger.PrintInfo("database connection *soon* to be established", nil)
+	logger.PrintInfo("database connection established", nil)
 	app := &application{
 		config: cfg,
 		logger: logger,
-		items:  data.NewItems(db),
+		items:  data.NewItems(dbpool),
 	}
 
 	err = app.serve()
 	if err != nil {
 		logger.PrintFatal(err, nil)
 	}
-}
-
-func openDB(cfg config) (*sql.DB, error) {
-	// create db connection pool
-	db, err := sql.Open("pgxpool", cfg.db.dsn)
-	if err != nil {
-		return nil, err
-	}
-
-	defer db.Close()
-
-	return db, nil
-
 }

@@ -11,7 +11,7 @@ func (app *application) routes() http.Handler {
 	router := httprouter.New()
 
 	// Insert routes here
-	router.HandlerFunc(http.MethodGet, "/api/pricing", app.handleGetPrice)
+	router.HandlerFunc(http.MethodGet, "/api/pricing/:id", app.handleGetPriceByID)
 
 	return router
 }

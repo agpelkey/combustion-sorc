@@ -1,68 +1,33 @@
 package main
 
 import (
+	"errors"
 	"net/http"
+
+	"github.com/agpelkey/combustion-sorc/internal/data"
 )
 
-func (app *application) handleGetPrice(w http.ResponseWriter, r *http.Request) {
-}
-
-/*
-func (s *APIServer) handleAddItem(w http.ResponseWriter, r *http.Request) error {
-	return nil
-}
-
-func (s *APIServer) handleGetPrice(w http.ResponseWriter, r *http.Request) error {
-
-	params := mux.Vars(r)
-
-	id, err := primitive.ObjectIDFromHex(params["id"])
+func (app *application) handleGetPriceByID(w http.ResponseWriter, r *http.Request) {
+	id, err := app.readIDParam(r)
 	if err != nil {
-		log.Fatal(err)
+		app.notFoundResponse(w, r)
+		return
 	}
 
-	var item Item
-
-	coll := s.db.Client().Database("ItemPrices").Collection("price")
-
-	err = coll.FindOne(context.TODO(), Item{ID: id}).Decode(&item)
+	item, err := app.items.Items.GetItemByID(id)
 	if err != nil {
-		log.Println(err)
-	}
-
-	json.NewEncoder(w).Encode(item)
-
-	return
-}
-
-func (s *APIServer) handleAddItem(w http.ResponseWriter, r *http.Request) error {
-	if r.Method == "POST" {
-
-		// initilialize Item struct
-		item := Item{}
-
-		// create database connection
-		coll := s.db.Client().Database("ItemPrices").Collection("prices")
-
-		// create variable to read document implementation
-		payload := json.NewDecoder(r.Body).Decode(&item)
-
-		// insert the payload into the DB
-		result, err := coll.InsertOne(context.TODO(), payload)
-		if err != nil {
-			panic(err)
+		switch {
+		case errors.Is(err, data.ErrRecordNotFound):
+			app.notFoundResponse(w, r)
+		default:
+			app.serverErrorResponse(w, r, err)
 		}
-
-		log.Println("Inserted document into database with _id: \n", result.InsertedID)
-
-		json.NewEncoder(w).Encode(result)
+		return
 	}
 
-	return nil
-}
-*/
+	err = app.writeJSON(w, http.StatusOK, envelope{"item": item}, nil)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+	}
 
-// for future implementation. Will need to figure out how to gate this behind admin access so not anyone can just alter the price.
-// func (s *APIServer) handleUpdateItemPrice(w http.ResponseWriter, r *http.Request) error {
-//	 return nil
-// }
+}
