@@ -1,13 +1,11 @@
 package main
 
 import (
-	"context"
 	"flag"
 	"os"
 
 	"github.com/agpelkey/combustion-sorc/internal/data"
 	"github.com/agpelkey/combustion-sorc/internal/jsonlog"
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type config struct {
@@ -25,7 +23,7 @@ type config struct {
 type application struct {
 	config config
 	logger *jsonlog.Logger
-	items  data.Models
+	DB     data.PostgresDBRepo
 }
 
 func main() {
@@ -41,17 +39,17 @@ func main() {
 
 	logger := jsonlog.New(os.Stdout, jsonlog.LevelInfo)
 
-	dbpool, err := pgxpool.New(context.Background(), os.Getenv("PRICING_DB_DSN"))
+	db, err := openDB(cfg.db.dsn)
 	if err != nil {
 		logger.PrintFatal(err, nil)
 	}
-	defer dbpool.Close()
+
+	defer db.Close()
 
 	logger.PrintInfo("database connection established", nil)
 	app := &application{
 		config: cfg,
 		logger: logger,
-		items:  data.NewItems(dbpool),
 	}
 
 	err = app.serve()

@@ -5,8 +5,6 @@ import (
 	"database/sql"
 	"errors"
 	"time"
-
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type Item struct {
@@ -15,17 +13,16 @@ type Item struct {
 	Price int `json:"price"`
 }
 
-// Create interface for DB connections
-type PriceStorage interface {
-	GetItemByID(id int) (*Item, error)
-}
+var (
+	ErrRecordNotFound = errors.New("record not found")
+)
 
 // Create Postgres DB struct
-type ItemModel struct {
-	DB *pgxpool.Pool
+type PostgresDBRepo struct {
+	DB *sql.DB
 }
 
-func (i ItemModel) GetItemByID(id int64) (*Item, error) {
+func (m *PostgresDBRepo) GetItemByID(id int64) (*Item, error) {
 	if id < 1 {
 		return nil, ErrRecordNotFound
 	}
@@ -39,7 +36,7 @@ func (i ItemModel) GetItemByID(id int64) (*Item, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	err := i.DB.QueryRow(ctx, query, id).Scan(
+	err := m.DB.QueryRowContext(ctx, query, id).Scan(
 		&item.ID,
 		&item.Name,
 		&item.Price,
