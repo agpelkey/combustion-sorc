@@ -14,7 +14,7 @@ func (app *application) handleGetPriceByID(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	item, err := app.DB.GetItemByID(id)
+	item, err := app.models.Items.GetItemByID(id)
 	if err != nil {
 		switch {
 		case errors.Is(err, data.ErrRecordNotFound):
