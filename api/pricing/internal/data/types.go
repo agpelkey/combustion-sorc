@@ -5,9 +5,9 @@ import (
 )
 
 type Item struct {
-	ID    int `json:"id"`
-	Name  int `json:"name"`
-	Price int `json:"price"`
+	ID    int      `json:"id"`
+	Name  string   `json:"name"`
+	Price float64  `json:"price"`
 }
 
 type Models struct {
