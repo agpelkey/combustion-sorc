@@ -1,21 +1,104 @@
 package main
 
 import (
-	"io/ioutil"
+	"database/sql"
+	"encoding/json"
+	//"encoding/json"
+	//"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+
+	//"fmt"
+	//"io/ioutil"
+	"log"
+	//"net/http"
+	//"net/http/httptest"
+	"os"
 	"testing"
 
 	"github.com/agpelkey/combustion-sorc/internal/data"
+	_ "github.com/lib/pq"
+	"github.com/stretchr/testify/require"
 )
 
 type mockItem struct {
-	item *data.Item
+	ID    int
+	Name  string
+	Price float64
+}
+
+const (
+	dbDriver = "postgres"
+)
+
+var testRepo *data.PostgresDBRepo
+
+func TestMain(m *testing.M) {
+	conn, err := sql.Open(dbDriver, os.Getenv("PRICING_DB_DSN"))
+	if err != nil {
+		log.Fatal("cannot connect to db")
+	}
+
+	testRepo = data.New(conn)
+
+	m.Run()
+}
+
+func TestGetItemByID(t *testing.T) {
+	item1 := &mockItem{
+		1,
+		"testItem",
+		5,
+	}
+	result, err := testRepo.GetItemByID(1)
+	require.NoError(t, err)
+	require.NotEmpty(t, result)
+
+	require.Equal(t, item1.ID, result.ID)
+	require.Equal(t, item1.Name, result.Name)
+	require.Equal(t, item1.Price, result.Price)
+
 }
 
 func TestHandleGetPriceByID(t *testing.T) {
 
 	var app application
+
+	/*
+		ts := httptest.NewTLSServer(app.routes())
+		defer ts.Close()
+
+		rs, err := ts.Client().Get(ts.URL + "/api/pricing/1")
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if rs.StatusCode != http.StatusOK {
+			t.Errorf("want %d; got %d", http.StatusOK, rs.StatusCode)
+		}
+
+		/*
+			fmt.Println("status code pass")
+
+			defer rs.Body.Close()
+
+			body, err := ioutil.ReadAll(rs.Body)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			if string(body) != "item" {
+				t.Errorf("want body to be equal to %q", "item")
+			}
+	*/
+
+	/*
+		testItem := &mockItem{
+			ID:    1,
+			Name:  "testItem",
+			Price: 5,
+		}
+	*/
 
 	rr := httptest.NewRecorder()
 	req, err := http.NewRequest(http.MethodGet, "", nil)
@@ -30,15 +113,20 @@ func TestHandleGetPriceByID(t *testing.T) {
 	}
 	defer rr.Result().Body.Close()
 
-	expected := "item"
-	b, err := ioutil.ReadAll(rr.Result().Body)
+	expected := &data.Item{}
 
-	if err != nil {
-		t.Error(err)
-	}
+	b := &data.Item{}
+	err = json.NewDecoder(rr.Result().Body).Decode(b)
 
-	if string(b) != expected {
-		t.Errorf("expected %s but we got %s", expected, string(b))
+	/*
+		b, err := ioutil.ReadAll(rr.Result().Body)
+		if err != nil {
+			t.Error(err)
+		}
+	*/
+
+	if b != expected {
+		t.Errorf("expected does not equal returned")
 	}
 
 }

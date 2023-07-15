@@ -24,6 +24,9 @@ type application struct {
 	config config
 	logger *jsonlog.Logger
 	models data.Models
+	mock   interface {
+		Get(int) (*data.Item, error)
+	}
 }
 
 func main() {

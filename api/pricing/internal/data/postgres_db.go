@@ -16,6 +16,10 @@ type PostgresDBRepo struct {
 	DB *sql.DB
 }
 
+func New(db *sql.DB) *PostgresDBRepo {
+	return &PostgresDBRepo{DB: db}
+}
+
 func (m *PostgresDBRepo) GetItemByID(id int64) (*Item, error) {
 	if id < 1 {
 		return nil, ErrRecordNotFound
