@@ -11,7 +11,7 @@
     - I have decided not to create an "other" service, and leave it as just the two services. 
     
 
-### Post-mortem
+### Post-mortem:
 #### I took two different approaches for the services. 
 #### For the inventory service, I kept things simple. I did not abrstact any files into seperate directories, and overall kept the whole code "lean and mean". I also coupled the database logic into the service itself, allowing the db.go file to create the DB connection and create the tables.
 #### For the pricing service, I did some deeper research into project/directory structure. As a result, you will see that this service is set up very different from the inventory serivce. Additionally, I incorporated more features into this service such a logging and graceful server shutdown. For a service that is only performing one task, this might be a bit overkill but I like the extra information (makes the service feel more sexy). Lastly, instead of incorporating the DB logic into the application itself, I used the golang "migrate" tool.
