@@ -64,42 +64,6 @@ func TestHandleGetPriceByID(t *testing.T) {
 
 	var app application
 
-	/*
-		ts := httptest.NewTLSServer(app.routes())
-		defer ts.Close()
-
-		rs, err := ts.Client().Get(ts.URL + "/api/pricing/1")
-		if err != nil {
-			t.Fatal(err)
-		}
-
-		if rs.StatusCode != http.StatusOK {
-			t.Errorf("want %d; got %d", http.StatusOK, rs.StatusCode)
-		}
-
-		/*
-			fmt.Println("status code pass")
-
-			defer rs.Body.Close()
-
-			body, err := ioutil.ReadAll(rs.Body)
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			if string(body) != "item" {
-				t.Errorf("want body to be equal to %q", "item")
-			}
-	*/
-
-	/*
-		testItem := &mockItem{
-			ID:    1,
-			Name:  "testItem",
-			Price: 5,
-		}
-	*/
-
 	rr := httptest.NewRecorder()
 	req, err := http.NewRequest(http.MethodGet, "", nil)
 	if err != nil {
